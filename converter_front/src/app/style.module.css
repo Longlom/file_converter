@@ -1,0 +1,12 @@
+
+.browseBtn {
+    margin-top: 20px;
+    display: block;
+
+    background-color: #d4ae02;
+    padding: 10px 20px;
+
+    border-radius: 15px;
+
+    cursor: pointer;
+}
