@@ -1,0 +1,22 @@
+.browseBtn {
+  margin-top: 20px;
+  display: block;
+
+  background-color: #d4ae02;
+  padding: 10px 20px;
+
+  border-radius: 15px;
+
+  cursor: pointer;
+}
+
+.formatLabel {
+  display: block;
+}
+
+.formatSelect {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+
+  outline: 1px solid #d4ae02;
+}
