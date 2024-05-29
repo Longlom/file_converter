@@ -14,22 +14,10 @@ import {
 import cn from "classnames";
 
 import init, { convert } from "converter_wasm";
-import { ValueOf } from "next/dist/shared/lib/constants";
+import { ALLOWED_FILES, FILE_FORMAT, ensureInputFile, getFile } from "@/utils/getFile";
 
 const INACTIVE_TEXT = "Drag and drop file here";
 const ACTIVE_TEXT = "Drop HERE";
-
-const FILE_FORMAT = {
-  "application/html": FileFormat.Html,
-  "text/markdown": FileFormat.Markdown,
-  "application/docx": FileFormat.Docx,
-  "application/json": FileFormat.Json,
-  "text/csv": FileFormat.Csv,
-  // "application/docx": FileFormat.Text,
-  "application/xml": FileFormat.Xml,
-} as const;
-
-const ALLOWED_FILES = Object.keys(FILE_FORMAT);
 
 export type ConvertProps = {
   convert: (
@@ -39,15 +27,10 @@ export type ConvertProps = {
   ) => Uint8Array;
 };
 
-function ensureType(
-  typeFormat: string
-): typeFormat is keyof typeof FILE_FORMAT {
-  return typeFormat in FILE_FORMAT;
-}
 
 export default function Converter() {
   const [file, setFile] = useState<File>();
-  const [outputFormat, setOutputFormat] = useState<FileFormat>();
+  const [outputFormat, setOutputFormat] = useState<FileFormat>(FileFormat.Html);
   const [dragCount, setDragCount] = useState(0);
   const dragnDropEl = useRef<HTMLDivElement | null>(null);
 
@@ -58,6 +41,7 @@ export default function Converter() {
 
     const file = e.dataTransfer.files[0];
     console.log(file.type);
+
     if (ALLOWED_FILES.some((fileName) => file.type.includes(fileName))) {
       setFile(file);
     }
@@ -66,7 +50,6 @@ export default function Converter() {
 
   const onDragOverHandler: DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
-    // console.log("onDragOverHandler", e.target);
   };
 
   const onDragStartHandler: DragEventHandler<HTMLDivElement> = (e) => {
@@ -92,41 +75,38 @@ export default function Converter() {
   };
 
   const onConvertClick: MouseEventHandler<HTMLButtonElement> = (e) => {
-    console.log("button clicked");
-    console.log(file);
-
-    console.log('outputFormat - ', outputFormat);
-
     const inputFileFormat = file?.type || "";
-    console.log(ensureType(inputFileFormat));
 
-    if (file && ensureType(inputFileFormat) && outputFormat) {
+    if (file && ensureInputFile(inputFileFormat)) {
       file.arrayBuffer().then((buffer) => {
         const uint = new Uint8Array(buffer);
-        console.log(uint);
-        const result = convert(
-          uint,
-          FILE_FORMAT[inputFileFormat],
-          outputFormat
-        );
-        const blob = new Blob([result.buffer], { type: inputFileFormat });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "demo.md";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        console.log(result);
+        try {
+          const result = convert(
+            uint,
+            FILE_FORMAT[inputFileFormat],
+            outputFormat
+          );
+
+          const blob = getFile(result, outputFormat, inputFileFormat);
+          const url = URL.createObjectURL(blob.file);
+          const name = `${file?.name.split(".")[0]}.${blob.name}`;
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (e) {
+          console.error("Error happened wile trying convert file - ", e);
+        }
       });
     }
   };
 
   const onSelectChange: ChangeEventHandler<HTMLSelectElement> = (e) => {
     const type = e.target?.value;
-
-    if (type && ensureType(type)) {
+    if (type && ensureInputFile(type)) {
       const ff = FILE_FORMAT[type];
 
       setOutputFormat(ff);

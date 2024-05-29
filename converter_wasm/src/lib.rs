@@ -30,33 +30,76 @@ pub enum FileFormat {
     Csv = 6,
 }
 
-
-
-#[wasm_bindgen]
-pub fn convert(file: Vec<u8>, input_format: FileFormat, output_format: FileFormat) -> Vec<u8> {
+#[wasm_bindgen(catch)]
+pub fn convert(
+    file: Vec<u8>,
+    input_format: FileFormat,
+    output_format: FileFormat,
+) -> Result<Vec<u8>, JsValue> {
     set_panic_hook();
     let parsed_file;
     match input_format {
         FileFormat::Text => {
-            parsed_file = text::Transformer::parse(&file.into(), &HashMap::new()).unwrap();
+            parsed_file = match text::Transformer::parse(&file.into(), &HashMap::new()) {
+                Ok(parse_result) => parse_result,
+                Err(e) => {
+                    return Err(e.to_string().into());
+                }
+            }
         }
         FileFormat::Markdown => {
-            parsed_file = markdown::Transformer::parse(&file.into(), &HashMap::new()).unwrap();
+            parsed_file = match markdown::Transformer::parse(&file.into(), &HashMap::new()) {
+                Ok(parse_result) => parse_result,
+                Err(e) => {
+                    return Err(e.to_string().into());
+                    
+                }
+            }
         }
         FileFormat::Docx => {
-            parsed_file = docx::Transformer::parse(&file.into(), &HashMap::new()).unwrap();
+            parsed_file = match docx::Transformer::parse(&file.into(), &HashMap::new()) {
+                Ok(parse_result) => parse_result,
+                Err(e) => {
+                    return Err(e.to_string().into());
+                    
+                }
+            }
         }
         FileFormat::Html => {
-            parsed_file = html::Transformer::parse(&file.into(), &HashMap::new()).unwrap();
+            parsed_file = match html::Transformer::parse(&file.into(), &HashMap::new()) {
+                Ok(parse_result) => parse_result,
+                Err(e) => {
+                    return Err(e.to_string().into());
+                    
+                }
+            }
         }
         FileFormat::Json => {
-            parsed_file = json::Transformer::parse(&file.into(), &HashMap::new()).unwrap();
+            parsed_file = match json::Transformer::parse(&file.into(), &HashMap::new()) {
+                Ok(parse_result) => parse_result,
+                Err(e) => {
+                    return Err(e.to_string().into());
+                    
+                }
+            }
         }
         FileFormat::Xml => {
-            parsed_file = xml::Transformer::parse(&file.into(), &HashMap::new()).unwrap();
+            parsed_file = match xml::Transformer::parse(&file.into(), &HashMap::new()) {
+                Ok(parse_result) => parse_result,
+                Err(e) => {
+                    return Err(e.to_string().into());
+                    
+                }
+            }
         }
         FileFormat::Csv => {
-            parsed_file = csv::Transformer::parse(&file.into(), &HashMap::new()).unwrap();
+            parsed_file = match csv::Transformer::parse(&file.into(), &HashMap::new()) {
+                Ok(parse_result) => parse_result,
+                Err(e) => {
+                    return Err(e.to_string().into());
+                    
+                }
+            }
         }
     }
 
@@ -66,70 +109,77 @@ pub fn convert(file: Vec<u8>, input_format: FileFormat, output_format: FileForma
                 Ok(res) => res,
                 Err(err) => {
                     log!(" FileFormat::Text err {:#?}", err);
-                    panic!();
+                    return Err(err.to_string().into());
+                    
                 }
             };
-            return generated.0.to_vec();
+            return Ok(generated.0.to_vec());
         }
         FileFormat::Markdown => {
             let generated = match markdown::Transformer::generate(&parsed_file) {
                 Ok(res) => res,
                 Err(err) => {
                     log!(" FileFormat::Markdown err {:#?}", err);
-                    panic!();
+                    return Err(err.to_string().into());
+                    
                 }
             };
-            return generated.0.to_vec();
+            return Ok(generated.0.to_vec());
         }
         FileFormat::Docx => {
             let generated = match docx::Transformer::generate(&parsed_file) {
                 Ok(res) => res,
                 Err(err) => {
                     log!(" FileFormat::Docx err {:#?}", err);
-                    panic!();
+                    return Err(err.to_string().into());
+                    
                 }
             };
-            return generated.0.to_vec();
+            return Ok(generated.0.to_vec());
         }
         FileFormat::Html => {
             let generated = match html::Transformer::generate(&parsed_file) {
                 Ok(res) => res,
                 Err(err) => {
                     log!(" FileFormat::Html err {:#?}", err);
-                    panic!();
+                    return Err(err.to_string().into());
+                    
                 }
             };
-            return generated.0.to_vec();
+            return Ok(generated.0.to_vec());
         }
         FileFormat::Json => {
             let generated = match json::Transformer::generate(&parsed_file) {
                 Ok(res) => res,
                 Err(err) => {
                     log!(" FileFormat::Json err {:#?}", err);
-                    panic!();
+                    return Err(err.to_string().into());
+                    
                 }
             };
-            return generated.0.to_vec();
+            return Ok(generated.0.to_vec());
         }
         FileFormat::Xml => {
             let generated = match xml::Transformer::generate(&parsed_file) {
                 Ok(res) => res,
                 Err(err) => {
                     log!(" FileFormat::Xml err {:#?}", err);
-                    panic!();
+                    return Err(err.to_string().into());
+                    
                 }
             };
-            return generated.0.to_vec();
+            return Ok(generated.0.to_vec());
         }
         FileFormat::Csv => {
             let generated = match csv::Transformer::generate(&parsed_file) {
                 Ok(res) => res,
                 Err(err) => {
                     log!(" FileFormat::Csv err {:#?}", err);
-                    panic!();
+                    return Err(err.to_string().into());
+                    
                 }
             };
-            return generated.0.to_vec();
+            return Ok(generated.0.to_vec());
         }
     }
 }
